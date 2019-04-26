@@ -9,14 +9,16 @@ import { fromLonLat } from 'ol/proj'
 import {Circle as CircleStyle, Icon, Style, Fill, Stroke} from 'ol/style.js';
 import Feature from 'ol/Feature';
 import VectorSource from 'ol/source/Vector';
-import image from './data/iconz.png'
+import image from './data/icon.png'
+
 
 class App extends Component {
   state = {
     rff1: [-87.921045, 30.238719],
     rff2: [-87.899646, 30.562203],
     rff3: [-88.107891, 30.418700],
-    center: [-87.921045, 30.458719]
+    center: [-87.921045, 30.458719],
+    features: [],
   }
 
   rffMarker1 = new Feature({
@@ -62,7 +64,46 @@ class App extends Component {
       zoom: 10
     })
   })
+  
+  // Study arrow syntax and callbacks if you don't understand the fetch request below
+  getJsonFromServer() {
+    fetch('http://ec2-18-220-62-10.us-east-2.compute.amazonaws.com:3000/getjson')
+    .then(res => res.json())
+    .then(data=>{
+      if(data.jsonstring != null) {
+        if(data.jsonstring.df != null) {
+          if(data.jsonstring.df.lob != null) {
+            let stringConverter = data.jsonstring.df.lob
+            let floatStringArray = stringConverter.split(',')
+            let latitude = parseFloat(floatStringArray[0])
+            let longitude = parseFloat(floatStringArray[1])
+            let longLat = fromLonLat([longitude, latitude])
+            let newArray = this.state.features
+            // newArray.append
+            // this.setState({
 
+            // })
+            console.log(longLat)
+          }
+          else {
+            console.log('lob was null. JSON must be broken:', data)
+          }
+        }
+        else {
+          console.log("data.df was empty. Consider fixing json string?", data)
+        }
+      }
+      else {
+        console.log("data had returned null")
+      }
+    })
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.features != prevState.features) {
+
+    }
+  }
   componentDidMount() {
     this.rffMarker1.setStyle(this.iconStyle)
     this.rffMarker2.setStyle(this.iconStyle)
@@ -70,6 +111,7 @@ class App extends Component {
     console.log(this.vectorLayer.getSource().getFeatures())
     this.olmap.setTarget('map')
     this.olmap.renderSync()
+    this.getJsonFromServer()
   }
   render() {
     
