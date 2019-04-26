@@ -12,7 +12,26 @@ import VectorSource from 'ol/source/Vector';
 import image from './data/icon.png'
 import {easeOut} from 'ol/easing.js';
 import {unByKey} from 'ol/Observable.js';
+import TextFields from './formcomponent'
+import servername from './const'
 
+const styles = theme => ({
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  textField: {
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit,
+    width: 200,
+  },
+  dense: {
+    marginTop: 19,
+  },
+  menu: {
+    width: 200,
+  },
+});
 
 class App extends Component {
   state = {
@@ -23,6 +42,7 @@ class App extends Component {
     features: [],
     currentValue: ''
   }
+  
 
   rffMarker1 = new Feature({
     // type: 'icon',
@@ -81,7 +101,7 @@ class App extends Component {
   
   // Study arrow syntax and callbacks if you don't understand the fetch request below
   getJsonFromServer() {
-    fetch('http://ec2-18-220-62-10.us-east-2.compute.amazonaws.com:3000/getjson')
+    fetch(`${servername}/getjson`)
     .then(res => res.json())
     .then(data=>{
       if(data.jsonstring != null) {
@@ -176,18 +196,19 @@ class App extends Component {
     this.olmap.on('click', this.showInfo.bind(this))
     // this.vectorAlerts.on('addfeature', this.flash.bind(this))
     this.getJsonFromServer()
+    // console.log('This is the servername', servername)
   }
 
   render() {
+    const { classes } = this.props 
     return (
       <div className="App">
-        <div id="map" className="map">
-          <pre id="info">
-            {this.state.currentFeatureText}
-          </pre>
-        </div>
+        <div id="map" className="map"></div>
+        <pre id="info">{this.state.currentFeatureText}</pre>
+
+        <TextFields></TextFields>
       </div>
-    );
+    )
   }
 }
 
