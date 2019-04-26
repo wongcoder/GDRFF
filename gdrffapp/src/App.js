@@ -46,17 +46,17 @@ class App extends Component {
 
   rffMarker1 = new Feature({
     // type: 'icon',
-    information: "what the fuck",
+    information: "rffMarker1",
     geometry: new Point(fromLonLat(this.state.rff1)),
   })
   rffMarker2 = new Feature({
     // type: 'icon',
-    information: "what the fuck",
+    information: "rffMarker2",
     geometry: new Point(fromLonLat(this.state.rff2)),
   })
   rffMarker3 = new Feature({
     // type: 'icon',
-    information: "what the fuck",
+    information: "rffMarker3",
     geometry: new Point(fromLonLat(this.state.rff3)),
   })
   
@@ -125,6 +125,7 @@ class App extends Component {
             this.setState({
               features: newArray
             })
+            console.log(data.jsonstring)
             console.log(newFeature)
             console.log(newFeature.getProperties())
             this.vectorAlerts.addFeature(newFeature)

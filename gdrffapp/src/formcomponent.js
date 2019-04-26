@@ -64,7 +64,7 @@ class TextFields extends React.Component {
             audiotext: this.state.audiotext
         },
         df: {
-            lob: `${this.state.longitude}, ${this.state.latitude}`
+            lob: `${this.state.latitude}, ${this.state.longitude}`
         }
     }
     console.log(data)
