@@ -14,6 +14,8 @@ import {easeOut} from 'ol/easing.js';
 import {unByKey} from 'ol/Observable.js';
 import TextFields from './formcomponent'
 import servername from './const'
+import Button from '@material-ui/core/Button';
+
 
 const styles = theme => ({
   container: {
@@ -206,7 +208,7 @@ class App extends Component {
       <div className="App">
         <div id="map" className="map"></div>
         <pre id="info">{this.state.currentFeatureText}</pre>
-
+        <Button onClick={()=>this.getJsonFromServer()}>Refresh Data</Button>
         <TextFields></TextFields>
       </div>
     )
