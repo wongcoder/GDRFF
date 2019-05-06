@@ -7,6 +7,7 @@ import OSM from 'ol/source/OSM' // imports open street map as a view
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
 import {Circle as CircleStyle, Icon, Style, Fill, Stroke} from 'ol/style.js';
+import { circular as circularPolygon } from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature';
 import VectorSource from 'ol/source/Vector';
 import image from './data/icon.png'
@@ -62,8 +63,7 @@ class App extends Component {
     geometry: new Point(fromLonLat(this.state.rff3)),
   })
   
-
-  iconStyle = new Style({
+  imageStyle = new Style({
     image: new Icon({
       src: image,
       size: [1000, 1000],
@@ -71,6 +71,8 @@ class App extends Component {
       scale: 0.05
     })
   })
+
+  iconStyle = this.imageStyle
 
   vectorSource = new VectorSource({
     features: [this.rffMarker1, this.rffMarker2, this.rffMarker3]
@@ -92,8 +94,8 @@ class App extends Component {
       new TileLayer({
         source: new OSM()
       }),
-      this.vectorLayer,
       this.vectorAlertLayer,
+      this.vectorLayer,
     ],
     view: new View({
       center: fromLonLat(this.state.center),
@@ -106,36 +108,39 @@ class App extends Component {
     fetch(`${servername}/getjson`)
     .then(res => res.json())
     .then(data=>{
-      if(data.jsonstring != null) {
-        if(data.jsonstring.df != null) {
-          if(data.jsonstring.df.lob != null) {
-            // Parse the json points to receive json data.
-            let stringConverter = data.jsonstring.df.lob
-            let floatStringArray = stringConverter.split(',')
-            let latitude = parseFloat(floatStringArray[0])
-            let longitude = parseFloat(floatStringArray[1])
-            let longLat = fromLonLat([longitude, latitude])
-
-            // Create a new feature on OpenLayers
-            let newFeature = new Feature({
-              geometry: new Point(longLat),
-              information: data.jsonstring
-            })
-            // newFeature.setStyle(this.iconStyle)
-            let newArray = this.state.features
-            newArray.push(newFeature)
-            this.setState({
-              features: newArray
-            })
-            console.log(data.jsonstring)
-            console.log(newFeature)
-            console.log(newFeature.getProperties())
-            this.vectorAlerts.addFeature(newFeature)
+      if(data != null) {
+        for(let element of data) {
+          if(element.jsonstring.df != null) {
+            if(element.jsonstring.df.lob != null) {
+              // Parse the json points to receive json data.
+              let stringConverter = element.jsonstring.df.lob
+              let floatStringArray = stringConverter.split(',')
+              let latitude = parseFloat(floatStringArray[0])
+              let longitude = parseFloat(floatStringArray[1])
+              let longLat = fromLonLat([longitude, latitude])
+  
+              // Create a new feature on OpenLayers
+              let newFeature = new Feature({
+                geometry: new Point(longLat),
+                information: element.jsonstring
+              })
+              // newFeature.setStyle(this.iconStyle)
+              let newArray = this.state.features
+              newArray.push(newFeature)
+              this.setState({
+                features: newArray
+              })
+              console.log("this is the json string", element.jsonstring)
+              console.log(newFeature)
+              console.log(newFeature.getProperties())
+              this.vectorAlerts.addFeature(newFeature)
+            }
+            else console.log('lob was null. JSON must be broken:', element)
           }
-          else console.log('lob was null. JSON must be broken:', data)
+          else console.log("data.df was empty. Consider fixing json string?", element)
         }
-        else console.log("data.df was empty. Consider fixing json string?", data)
-      }
+        }
+        
       else console.log("data had returned null")
     })
   }
@@ -198,6 +203,18 @@ class App extends Component {
     this.olmap.renderSync()
     this.olmap.on('click', this.showInfo.bind(this))
     // this.vectorAlerts.on('addfeature', this.flash.bind(this))
+    let radius = 20000
+    let edgeCount = 64
+    let rffMarkerRing1 = circularPolygon(this.state.rff1, radius, edgeCount)
+    let rffMarkerRing2 = circularPolygon(this.state.rff2, radius, edgeCount)
+    let rffMarkerRing3 = circularPolygon(this.state.rff3, radius, edgeCount)
+    let newFeature1 = rffMarkerRing1.clone().transform('EPSG:4326', 'EPSG:3857')
+    let newFeature2 = rffMarkerRing2.clone().transform('EPSG:4326', 'EPSG:3857')
+    let newFeature3 = rffMarkerRing3.clone().transform('EPSG:4326', 'EPSG:3857')
+
+    this.vectorAlertLayer.getSource().addFeature(new Feature(newFeature1))
+    this.vectorAlertLayer.getSource().addFeature(new Feature(newFeature2))
+    this.vectorAlertLayer.getSource().addFeature(new Feature(newFeature3))
     this.getJsonFromServer()
     // console.log('This is the servername', servername)
   }
@@ -210,6 +227,7 @@ class App extends Component {
         <pre id="info">{this.state.currentFeatureText}</pre>
         <Button onClick={()=>this.getJsonFromServer()}>Refresh Data</Button>
         <TextFields></TextFields>
+
       </div>
     )
   }

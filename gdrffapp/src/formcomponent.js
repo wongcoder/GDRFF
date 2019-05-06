@@ -28,25 +28,6 @@ const styles = theme => ({
   },
 });
 
-const currencies = [
-  {
-    value: 'USD',
-    label: '1',
-  },
-  {
-    value: 'EUR',
-    label: '2',
-  },
-  {
-    value: 'BTC',
-    label: '3',
-  },
-  {
-    value: 'JPY',
-    label: '4',
-  },
-];
-
 class TextFields extends React.Component {
   state = {
     longitude: 0,
