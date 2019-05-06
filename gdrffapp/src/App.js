@@ -16,6 +16,7 @@ import {unByKey} from 'ol/Observable.js';
 import TextFields from './formcomponent'
 import servername from './const'
 import Button from '@material-ui/core/Button';
+import { TextField } from '@material-ui/core';
 
 
 const styles = theme => ({
@@ -103,6 +104,22 @@ class App extends Component {
     })
   })
   
+  doesFeatureExist(latitude, longitude) {
+    let featureArray = this.vectorAlertLayer.getSource().getFeatures()
+    // console.log(fromLonLat(this.state.rff1))
+    for(let i = 0; i < featureArray.length; i++) {
+      // console.log('FEATURES', featureArray[i].values_.geometry.flatCoordinates)
+      // console.log('NEW VALUE', fromLonLat([longitude, latitude]))
+      if(featureArray[i].values_.geometry.flatCoordinates[0] == fromLonLat([longitude, latitude])[0] && featureArray[i].values_.geometry.flatCoordinates[1] == fromLonLat([longitude, latitude])[1] ) {
+        // console.log('Values returned matched')
+        return true
+      }
+
+    }
+    // console.log('=========FALSE=========')
+    // console.log(featureArray)
+    return false
+  }
   // Study arrow syntax and callbacks if you don't understand the fetch request below
   getJsonFromServer() {
     fetch(`${servername}/getjson`)
@@ -117,30 +134,23 @@ class App extends Component {
               let floatStringArray = stringConverter.split(',')
               let latitude = parseFloat(floatStringArray[0])
               let longitude = parseFloat(floatStringArray[1])
-              let longLat = fromLonLat([longitude, latitude])
   
               // Create a new feature on OpenLayers
-              let newFeature = new Feature({
-                geometry: new Point(longLat),
-                information: element.jsonstring
-              })
-              // newFeature.setStyle(this.iconStyle)
-              let newArray = this.state.features
-              newArray.push(newFeature)
-              this.setState({
-                features: newArray
-              })
-              console.log("this is the json string", element.jsonstring)
-              console.log(newFeature)
-              console.log(newFeature.getProperties())
-              this.vectorAlerts.addFeature(newFeature)
+              if(!this.doesFeatureExist(latitude, longitude)) {
+                let longLat = fromLonLat([longitude, latitude])
+                let newFeature = new Feature({
+                  geometry: new Point(longLat),
+                  information: element.jsonstring
+                })
+                this.vectorAlerts.addFeature(newFeature)
+              }
             }
             else console.log('lob was null. JSON must be broken:', element)
           }
           else console.log("data.df was empty. Consider fixing json string?", element)
         }
-        }
-        
+        console.log('Features were updated', this.vectorAlertLayer.getSource().getFeatures())
+      }
       else console.log("data had returned null")
     })
   }
@@ -198,7 +208,6 @@ class App extends Component {
     this.rffMarker1.setStyle(this.iconStyle)
     this.rffMarker2.setStyle(this.iconStyle)
     this.rffMarker3.setStyle(this.iconStyle)
-    console.log(this.vectorLayer.getSource().getFeatures())
     this.olmap.setTarget('map')
     this.olmap.renderSync()
     this.olmap.on('click', this.showInfo.bind(this))
@@ -211,11 +220,11 @@ class App extends Component {
     let newFeature1 = rffMarkerRing1.clone().transform('EPSG:4326', 'EPSG:3857')
     let newFeature2 = rffMarkerRing2.clone().transform('EPSG:4326', 'EPSG:3857')
     let newFeature3 = rffMarkerRing3.clone().transform('EPSG:4326', 'EPSG:3857')
-
+    
     this.vectorAlertLayer.getSource().addFeature(new Feature(newFeature1))
     this.vectorAlertLayer.getSource().addFeature(new Feature(newFeature2))
     this.vectorAlertLayer.getSource().addFeature(new Feature(newFeature3))
-    this.getJsonFromServer()
+    setInterval(()=>this.getJsonFromServer(), 2000)
     // console.log('This is the servername', servername)
   }
 
@@ -227,7 +236,6 @@ class App extends Component {
         <pre id="info">{this.state.currentFeatureText}</pre>
         <Button onClick={()=>this.getJsonFromServer()}>Refresh Data</Button>
         <TextFields></TextFields>
-
       </div>
     )
   }

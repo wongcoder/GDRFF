@@ -98,7 +98,6 @@ class TextFields extends React.Component {
           margin="normal"
         />
 
-
         <Button variant="contained" color="primary" className={classes.button} onClick={() => this.handlePostRequest()}>
             Primary
         </Button>
