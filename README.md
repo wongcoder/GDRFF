@@ -4,6 +4,13 @@ The current front-end section for General Dynamics. Shouldn't work by itself--it
 
 There are no coding standards and the code is messy. I wrote this in about one day to demo for General Dynamics. 
 
+TODO:
+Install ESLint with airbnb styling
+
+Create a beautiful mockup of the front-end
+
+Fix up material design
+
 ## Available Scripts
 
 In the project directory, you can run:
